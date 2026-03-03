@@ -41,7 +41,7 @@ NanoURL/
 1. Clone the repository:
 
 ```
-git clone https://github.com/your-username/NanoURL.git
+git clone https://github.com/arjun-s-rajput/NanoURL.git
 ```
 
 2. Install dependencies:
