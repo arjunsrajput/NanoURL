@@ -2,14 +2,127 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ShortURL</title>
-  <link rel="stylesheet" href="style.css">
+  <title>NanoURL - Smart URL Shortener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: white;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px 0 0 6px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      background-color: #ff7eb3;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 0 6px 6px 0;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff4f8b;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+
+    #result a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #result a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.2);
+      font-size: 0.9rem;
+    }
+
+    footer span {
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    @media(max-width: 500px) {
+      form {
+        flex-direction: column;
+      }
+
+      input {
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        border-radius: 6px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
   <div class="container">
-    <h1>🔗 URL Shortener</h1>
-    
+    <h1>🔗 NanoURL</h1>
+    <p>Fast. Simple. Reliable URL Shortener.</p>
+
     <form id="shortenForm">
       <input 
         type="text" 
@@ -21,35 +134,57 @@
     </form>
 
     <div id="result"></div>
+    <div id="loading" class="loading"></div>
   </div>
+
+  <footer>
+    Built with ❤️ by <span>Arjun Singh Rajput</span> | NanoURL © 2026
+  </footer>
 
   <script>
     const form = document.getElementById("shortenForm");
     const resultDiv = document.getElementById("result");
+    const loadingDiv = document.getElementById("loading");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const url = document.getElementById("urlInput").value;
 
-      const response = await fetch("http://localhost:9001/url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url })
-      });
+      const url = document.getElementById("urlInput").value.trim();
 
-      const data = await response.json();
+      if (!url) {
+        resultDiv.innerHTML = `<p style="color:#ffcccc;">Please enter a valid URL</p>`;
+        return;
+      }
 
-      if (data.id) {
-        resultDiv.innerHTML = `
-          <p>Short URL:</p>
-          <a href="http://localhost:9001/${data.id}" target="_blank">
-            http://localhost:9001/${data.id}
-          </a>
-        `;
-      } else {
-        resultDiv.innerHTML = `<p style="color:red;">Something went wrong</p>`;
+      loadingDiv.textContent = "Shortening your URL...";
+      resultDiv.innerHTML = "";
+
+      try {
+        const response = await fetch("/url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+        loadingDiv.textContent = "";
+
+        if (data.id) {
+          resultDiv.innerHTML = `
+            <p>✨ Your Short URL:</p>
+            <a href="/${data.id}" target="_blank">
+              ${window.location.origin}/${data.id}
+            </a>
+          `;
+        } else {
+          resultDiv.innerHTML = `<p style="color:#ffcccc;">Something went wrong</p>`;
+        }
+
+      } catch (error) {
+        loadingDiv.textContent = "";
+        resultDiv.innerHTML = `<p style="color:#ffcccc;">Server error. Try again later.</p>`;
       }
     });
   </script>
